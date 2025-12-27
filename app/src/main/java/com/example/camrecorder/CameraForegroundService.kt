@@ -42,7 +42,10 @@ class CameraForegroundService : LifecycleService() {
         return super.onStartCommand(intent, flags, startId)
     }
 
-    fun startRecording(cameraSelector: CameraSelector, onVideoSaved: (String) -> Unit) {
+// In CameraForegroundService.kt
+
+    // 1. Update the signature to accept lens info
+    fun startRecording(cameraSelector: CameraSelector, isFront: Boolean, onVideoSaved: (String) -> Unit) {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(this)
         cameraProviderFuture.addListener({
             val cameraProvider = cameraProviderFuture.get()
@@ -56,7 +59,8 @@ class CameraForegroundService : LifecycleService() {
                 cameraProvider.unbindAll()
                 cameraProvider.bindToLifecycle(this, cameraSelector, videoCapture)
 
-                val fileName = "REC_${SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())}.mp4"
+                // 2. Use your helper to generate the filename with the side tag
+                val fileName = generateFilename(isFront)
                 val file = File(getExternalFilesDir(null), fileName)
 
                 val outputOptions = FileOutputOptions.Builder(file).build()
@@ -65,8 +69,16 @@ class CameraForegroundService : LifecycleService() {
                     ?.prepareRecording(this, outputOptions)
                     ?.withAudioEnabled()
                     ?.start(ContextCompat.getMainExecutor(this)) { event ->
+                        // 3. Keep the logic inside the listener where 'event' is valid
                         if (event is VideoRecordEvent.Finalize) {
-                            onVideoSaved(file.absolutePath)
+                            val path = file.absolutePath
+                            if (!event.hasError()) {
+                                updateNotification("Recording saved")
+                                onVideoSaved(path)
+                            } else {
+                                Log.e("CamService", "Video error: ${event.error}")
+                                updateNotification("Recording failed")
+                            }
                         }
                     }
 
@@ -76,7 +88,6 @@ class CameraForegroundService : LifecycleService() {
             }
         }, ContextCompat.getMainExecutor(this))
     }
-
     fun stopRecording() {
         recording?.stop()
         recording = null
@@ -95,6 +106,17 @@ class CameraForegroundService : LifecycleService() {
     private fun updateNotification(content: String) {
         val notificationManager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
         notificationManager.notify(1, createNotification(content))
+    }
+    // Pass the lens facing info to the service when starting a record
+    private fun generateFilename(isFront: Boolean): String {
+        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+        val side = if (isFront) "front" else "back"
+        return "REC_${side}_${timestamp}.mp4"
+    }
+
+    // Remove the logic that refers to 'event' here
+    private fun onVideoSaved(path: String) {
+        Log.d("CamService", "Video saved to: $path")
     }
 
     private fun createNotificationChannel() {

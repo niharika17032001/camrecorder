@@ -29,4 +29,12 @@
         android:layout_height="64dp"
         android:text="View Gallery"
         style="@style/Widget.Material3.Button.OutlinedButton"/>
+
+    <Button
+        android:id="@+id/btnQuit"
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:text="Quit App"
+        android:backgroundTint="#D32F2F"
+        android:textColor="#FFFFFF"/>
 </LinearLayout>

@@ -9,25 +9,31 @@ import java.io.File
 
 class VideoAdapter(
     private val videoFiles: List<File>,
-    private val onItemClick: (File) -> Unit
+    private val onItemClick: (File) -> Unit,
+    private val onItemLongClick: (File) -> Unit // New parameter for deletion
 ) : RecyclerView.Adapter<VideoAdapter.VideoViewHolder>() {
 
     inner class VideoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        // Uses the standard Android ID for a simple list item
-        val fileName: TextView = view.findViewById(android.R.id.text1)
+        val fileName: TextView = view.findViewById(R.id.tvFileName)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
-        // FIX: Added 'android.' prefix to access the system resource
         val view = LayoutInflater.from(parent.context)
-            .inflate(android.R.layout.simple_list_item_1, parent, false)
+            .inflate(R.layout.item_video, parent, false)
         return VideoViewHolder(view)
     }
 
     override fun onBindViewHolder(holder: VideoViewHolder, position: Int) {
         val file = videoFiles[position]
         holder.fileName.text = file.name
+
         holder.itemView.setOnClickListener { onItemClick(file) }
+
+        // Handle long click for deletion
+        holder.itemView.setOnLongClickListener {
+            onItemLongClick(file)
+            true
+        }
     }
 
     override fun getItemCount(): Int = videoFiles.size

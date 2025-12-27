@@ -56,8 +56,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    // In MainActivity.kt inside startAction()
     private fun startAction() {
-        service?.startRecording(CameraSelector.Builder().requireLensFacing(lensFacing).build()) { path ->
+        val isFront = lensFacing == CameraSelector.LENS_FACING_FRONT
+        service?.startRecording(
+            CameraSelector.Builder().requireLensFacing(lensFacing).build(),
+            isFront // Pass the lens info here
+        ) { path ->
             runOnUiThread { Toast.makeText(this, "Saved: $path", Toast.LENGTH_LONG).show() }
         }
         isRecording = true
