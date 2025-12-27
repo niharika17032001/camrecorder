@@ -20,5 +20,17 @@ class HomeActivity : AppCompatActivity() {
         binding.btnGoToGallery.setOnClickListener {
             startActivity(Intent(this, GalleryActivity::class.java))
         }
+
+        // ... inside onCreate ...
+        binding.btnQuit.setOnClickListener {
+            // 1. Stop the background service (removes notification)
+            stopService(Intent(this, CameraForegroundService::class.java))
+
+            // 2. Close all activities in the stack
+            finishAffinity()
+
+            // 3. Exit the process
+            System.exit(0)
+        }
     }
 }

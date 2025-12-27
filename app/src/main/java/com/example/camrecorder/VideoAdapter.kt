@@ -6,21 +6,21 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import java.io.File
-
+// Updated VideoAdapter.kt
 class VideoAdapter(
     private val videoFiles: List<File>,
     private val onItemClick: (File) -> Unit
 ) : RecyclerView.Adapter<VideoAdapter.VideoViewHolder>() {
 
     inner class VideoViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        // Uses the standard Android ID for a simple list item
-        val fileName: TextView = view.findViewById(android.R.id.text1)
+        // Change this to use your new ID: tvFileName
+        val fileName: TextView = view.findViewById(R.id.tvFileName)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VideoViewHolder {
-        // FIX: Added 'android.' prefix to access the system resource
+        // Change simple_list_item_1 to your new custom layout: R.layout.item_video
         val view = LayoutInflater.from(parent.context)
-            .inflate(android.R.layout.simple_list_item_1, parent, false)
+            .inflate(R.layout.item_video, parent, false)
         return VideoViewHolder(view)
     }
 
